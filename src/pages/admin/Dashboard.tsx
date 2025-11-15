@@ -17,14 +17,18 @@ import {
   Tab,
   Chip,
   Stack,
+  Button,
 } from '@mui/material';
 import {
   People as PeopleIcon,
   MenuBook as BookIcon,
   LocalLibrary as LoanIcon,
   Warning as WarningIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { formatDate } from '../../utils/dateUtils';
 
 interface Statistics {
   usuarios: {
@@ -63,6 +67,7 @@ interface User {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -97,16 +102,6 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('es-GT', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   const StatCard = ({ title, value, icon, color }: any) => (
@@ -145,10 +140,35 @@ export default function AdminDashboard() {
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Panel de Administración
-      </Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1,
+            }}
+          >
+            🔧 Panel de Administración
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Gestiona usuarios, libros y monitorea el sistema
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<EditIcon />}
+          onClick={() => navigate('/admin/books')}
+          sx={{ py: 1.5, px: 3 }}
+        >
+          Gestionar Libros
+        </Button>
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

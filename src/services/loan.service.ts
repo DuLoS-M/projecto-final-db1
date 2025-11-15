@@ -1,31 +1,23 @@
 import api from './api';
-
-export interface Loan {
-  idprestamo: number;
-  fechaprestamo: string;
-  fechadevolucionprevista: string;
-  fechadevolucionreal?: string;
-  estado: string;
-  usuario_idusuario: number;
-}
+import type { Prestamo } from '../types';
 
 export const loanService = {
-  async getMyLoans(): Promise<Loan[]> {
-    const response = await api.get('/prestamos/my-loans');
-    return response.data;
+  async getMyLoans(): Promise<Prestamo[]> {
+    const response = await api.get('/loans/my-loans');
+    return response.data.data || response.data;
   },
 
-  async getAllLoans(): Promise<Loan[]> {
-    const response = await api.get('/prestamos');
-    return response.data;
+  async getAllLoans(): Promise<Prestamo[]> {
+    const response = await api.get('/admin/loans');
+    return response.data.data || response.data;
   },
 
-  async create(isbn: string): Promise<Loan> {
-    const response = await api.post('/prestamos', { isbn });
-    return response.data;
+  async create(isbn: string): Promise<Prestamo> {
+    const response = await api.post('/loans', { isbn });
+    return response.data.data || response.data;
   },
 
   async returnLoan(loanId: number): Promise<void> {
-    await api.put(`/prestamos/${loanId}/return`);
+    await api.put(`/loans/${loanId}/return`);
   },
 };

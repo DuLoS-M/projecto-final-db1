@@ -14,30 +14,30 @@ export interface Book {
 export const bookService = {
   async getAll(): Promise<Book[]> {
     const response = await api.get('/books');
-    return response.data;
+    return response.data.data || response.data;
   },
 
   async getByISBN(isbn: string): Promise<Book> {
     const response = await api.get(`/books/${isbn}`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   async search(term: string): Promise<Book[]> {
-    const response = await api.get(`/books/search?q=${encodeURIComponent(term)}`);
-    return response.data;
+    const response = await api.get(`/books?q=${encodeURIComponent(term)}`);
+    return response.data.data || response.data;
   },
 
   async create(book: Partial<Book>): Promise<Book> {
-    const response = await api.post('/books', book);
-    return response.data;
+    const response = await api.post('/admin/books', book);
+    return response.data.data || response.data;
   },
 
   async update(isbn: string, book: Partial<Book>): Promise<Book> {
-    const response = await api.put(`/books/${isbn}`, book);
-    return response.data;
+    const response = await api.put(`/admin/books/${isbn}`, book);
+    return response.data.data || response.data;
   },
 
   async delete(isbn: string): Promise<void> {
-    await api.delete(`/books/${isbn}`);
+    await api.delete(`/admin/books/${isbn}`);
   },
 };

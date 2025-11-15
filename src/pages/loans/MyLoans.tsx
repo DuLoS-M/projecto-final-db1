@@ -16,18 +16,11 @@ import {
   Paper,
 } from '@mui/material';
 import { loanService } from '../../services/loan.service';
-
-interface Loan {
-  idprestamo: number;
-  fechaprestamo: string;
-  fechadevolucionprevista: string;
-  fechadevolucionreal?: string;
-  estado: string;
-  usuario_idusuario: number;
-}
+import { formatDate, isPastDate } from '../../utils/dateUtils';
+import type { Prestamo } from '../../types';
 
 export default function MyLoans() {
-  const [loans, setLoans] = useState<Loan[]>([]);
+  const [loans, setLoans] = useState<Prestamo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -40,9 +33,10 @@ export default function MyLoans() {
     try {
       setLoading(true);
       const data = await loanService.getMyLoans();
-      setLoans(data);
+      setLoans(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message || 'Error al cargar préstamos');
+      setLoans([]);
     } finally {
       setLoading(false);
     }
@@ -58,25 +52,11 @@ export default function MyLoans() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-GT', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const isOverdue = (loan: Loan) => {
-    if (loan.estado !== 'ACTIVO') return false;
-    const dueDate = new Date(loan.fechadevolucionprevista);
-    return dueDate < new Date();
-  };
-
-  const getStatusChip = (loan: Loan) => {
+  const getStatusChip = (loan: Prestamo) => {
     if (loan.estado === 'DEVUELTO') {
       return <Chip label="Devuelto" color="success" size="small" />;
     }
-    if (isOverdue(loan)) {
+    if (isPastDate(loan.fecha_devolucion_prevista) && loan.estado === 'ACTIVO') {
       return <Chip label="Vencido" color="error" size="small" />;
     }
     return <Chip label="Activo" color="primary" size="small" />;
@@ -111,7 +91,7 @@ export default function MyLoans() {
         </Typography>
       </Box>
 
-      {loans.length === 0 ? (
+      {(!Array.isArray(loans) || loans.length === 0) ? (
         <Box 
           sx={{
             p: 6,
@@ -148,27 +128,29 @@ export default function MyLoans() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loans.map((loan) => (
+              {Array.isArray(loans) && loans.map((loan) => {
+                const isLoanOverdue = isPastDate(loan.fecha_devolucion_prevista) && loan.estado === 'ACTIVO';
+                return (
                 <TableRow
-                  key={loan.idprestamo}
+                  key={loan.id_prestamo}
                   sx={{
-                    backgroundColor: isOverdue(loan) ? 'rgba(239, 68, 68, 0.1)' : 'inherit',
+                    backgroundColor: isLoanOverdue ? 'rgba(239, 68, 68, 0.1)' : 'inherit',
                     '&:hover': {
-                      backgroundColor: isOverdue(loan) ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.05)',
+                      backgroundColor: isLoanOverdue ? 'rgba(239, 68, 68, 0.15)' : 'rgba(99, 102, 241, 0.05)',
                     },
                   }}
                 >
-                  <TableCell>#{loan.idprestamo}</TableCell>
-                  <TableCell>{formatDate(loan.fechaprestamo)}</TableCell>
+                  <TableCell>#{loan.id_prestamo}</TableCell>
+                  <TableCell>{formatDate(loan.fecha_prestamo)}</TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {isOverdue(loan) && <span>⚠️</span>}
-                      {formatDate(loan.fechadevolucionprevista)}
+                      {isLoanOverdue && <span>⚠️</span>}
+                      {formatDate(loan.fecha_devolucion_prevista)}
                     </Box>
                   </TableCell>
                   <TableCell>
-                    {loan.fechadevolucionreal
-                      ? formatDate(loan.fechadevolucionreal)
+                    {loan.fecha_devolucion_real
+                      ? formatDate(loan.fecha_devolucion_real)
                       : '-'}
                   </TableCell>
                   <TableCell>{getStatusChip(loan)}</TableCell>
@@ -178,7 +160,7 @@ export default function MyLoans() {
                         size="small"
                         variant="contained"
                         color="primary"
-                        onClick={() => handleReturn(loan.idprestamo)}
+                        onClick={() => handleReturn(loan.id_prestamo)}
                         sx={{ py: 0.5 }}
                       >
                         Devolver
@@ -186,7 +168,8 @@ export default function MyLoans() {
                     )}
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

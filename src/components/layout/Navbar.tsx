@@ -83,18 +83,32 @@ const Navbar = () => {
           </Button>
 
           {hasRole('admin') && (
-            <Button 
-              color="inherit" 
-              onClick={() => navigate('/admin')}
-              sx={{ 
-                '&:hover': { 
-                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                  color: '#818cf8',
-                } 
-              }}
-            >
-              Administración
-            </Button>
+            <>
+              <Button 
+                color="inherit" 
+                onClick={() => navigate('/admin')}
+                sx={{ 
+                  '&:hover': { 
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    color: '#818cf8',
+                  } 
+                }}
+              >
+                Administración
+              </Button>
+              <Button 
+                color="inherit" 
+                onClick={() => navigate('/admin/reports')}
+                sx={{ 
+                  '&:hover': { 
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    color: '#818cf8',
+                  } 
+                }}
+              >
+                Reportes
+              </Button>
+            </>
           )}
 
           <Button 
